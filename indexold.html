@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Doorprize Event — Inline Edit 4 Digit (Dynamic List)</title>
+  <title>Doorprize Event — Inline Edit</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body {
@@ -19,8 +19,8 @@
 
     .list-container {
       display: grid;
-      grid-template-columns: repeat(4, 180px);
-      gap: 40px 120px;
+      grid-template-columns: repeat(3, 180px);
+      gap: 40px 60px;
       justify-content: center;
       align-items: center;
     }
@@ -45,6 +45,14 @@
       text-shadow: 0 0 25px rgba(255,215,0,0.6);
     }
 
+    .note {
+      margin-top: 18px;
+      color: #fff;
+      opacity: .9;
+      font-size: 14px;
+      text-align: center;
+    }
+
     @media (max-width:640px){
       .list-container { grid-template-columns: repeat(2, 140px); gap: 24px 24px; }
       .item { font-size: 64px; }
@@ -53,13 +61,15 @@
 </head>
 <body>
   <div class="list-container" id="listContainer"></div>
+  <!-- <div class="note">
+    Tekan <b>Shift + (1–9)</b>, <b>Shift + 0</b> (10), atau <b>Shift + -</b> (11) untuk edit.<br>
+    Ketik angka (max 3 digit), lalu tekan <b>Enter</b> untuk menyimpan.
+  </div> -->
 
   <script>
     const container = document.getElementById('listContainer');
-    let totalList = parseInt(prompt("Berapa list nomor doorprize yang ingin digunakan?", "11"));
-    if (isNaN(totalList) || totalList < 1) totalList = 11;
-
-    const data = Array(totalList).fill('0000');
+    const totalList = 11;
+    const data = Array(totalList).fill('000');
     let activeIndex = null;
     let buffer = '';
 
@@ -82,17 +92,15 @@
 
     function endEdit() {
       if (activeIndex !== null && buffer) {
-        let num = parseInt(buffer);
-        if (num > 9999) num = 9999;
-        data[activeIndex] = String(num).padStart(4, '0');
+        data[activeIndex] = buffer.padStart(3, '0');
       }
       activeIndex = null;
       buffer = '';
       render();
     }
 
+    // Tangkap Shift + Nomor
     document.addEventListener('keydown', (e) => {
-      // Shortcut untuk pilih item (Shift + nomor)
       if (e.shiftKey) {
         const code = e.code;
         let idx = null;
@@ -103,27 +111,23 @@
           idx = 9;
         } else if (code === 'Minus') {
           idx = 10;
-        } else if (code === 'Equal') idx = 11; // Tombol "=" di atas keyboard
-        else if (/^Key[A-Z]$/.test(code)) {
-          idx = 12 + (code.charCodeAt(3) - 65); // A=13, B=14, C=15, dst.
         }
 
-        // Pastikan tidak keluar dari jumlah list
-        if (idx !== null && idx < data.length) {
+        if (idx !== null) {
           e.preventDefault();
           startEdit(idx);
           return;
         }
       }
 
-      // Mode edit aktif
+      // Jika sedang edit — ketik angka langsung
       if (activeIndex !== null) {
-        if (/^\d$/.test(e.key) && buffer.length < 4) {
+        if (/^\d$/.test(e.key) && buffer.length < 3) {
           buffer += e.key;
-          container.children[activeIndex].textContent = buffer.padStart(4, '0');
+          container.children[activeIndex].textContent = buffer.padStart(3, '0');
         } else if (e.key === 'Backspace') {
           buffer = buffer.slice(0, -1);
-          container.children[activeIndex].textContent = buffer.padStart(4, '0') || '0000';
+          container.children[activeIndex].textContent = buffer || '000';
         } else if (e.key === 'Enter') {
           endEdit();
         } else if (e.key === 'Escape') {
